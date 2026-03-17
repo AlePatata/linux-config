@@ -55,6 +55,12 @@
     packages = with pkgs; [
       neovim
       uv
+      ripgrep
+      sublime
+      python3
+      gcc
+      discord
+      atuin
     ];
   };
 
@@ -87,7 +93,6 @@
   security.rtkit.enable = true;
 
   
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
@@ -109,38 +114,21 @@
     ranger
     wl-clipboard
     catppuccin-cursors.mochaDark
-
-    thunar
-    thunar-volman
-    thunar-archive-plugin
     gvfs
-    tumbler
-
     nwg-dock-hyprland  # funciona en sway también
-  
-    # launcher
     rofi
-
-    # notificaciones
     mako
     libnotify
-
-    # wallpaper
-    swww
-
-    # utilidades de escritorio
     nwg-look      # configurar temas GTK
     papirus-icon-theme
     glib
     dconf
-
-    discord
     pavucontrol
-    sublime
     vesktop
     nodejs_24
     stow
   ];
+
 
 
 
@@ -183,24 +171,6 @@
       };
     };
   };
-
-
-  # services.blueman.enable = true;
-   stylix = {
-    polarity = "dark";
-    cursor = {
-      name = "catppuccin-mocha-dark-cursors";
-      package = pkgs.catppuccin-cursors.mochaDark;
-      size = 24;
-    };
-    icons = {
-      enable = true;
-      dark = "Papirus-Dark";
-      light = "Papirus-Light";
-      package = pkgs.papirus-icon-theme;
-    };
-  };
-
 
 
 }
