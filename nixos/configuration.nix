@@ -87,7 +87,6 @@
       uv
       ripgrep
       python3
-      sublime3
       gcc
       discord
       libGL
@@ -148,6 +147,7 @@
   
   environment.systemPackages = with pkgs; [
     vim 
+    sublime3
     wget
     curl
     foot

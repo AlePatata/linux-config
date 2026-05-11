@@ -1,0 +1,25 @@
+<snippet>
+	<content><![CDATA[
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef vector<int> vi;
+typedef pair<int,int> pii;
+typedef long long ll;
+
+void solve() {
+	int n; cin >> n;
+	${1:// your code here}
+}
+
+int main() {
+	ios::sync_with_stdio(0); cin.tie(0);
+	int t; cin >> t;
+	for (int i = 0; i<t; i++) 
+		solve();
+	return 0;
+}
+]]></content>
+	<tabTrigger>frog</tabTrigger>
+	<scope>source.c++</scope>
+</snippet>
