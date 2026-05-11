@@ -10,6 +10,28 @@
       ./hardware-configuration.nix
     ];
 
+  programs.nix-ld.enable = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc.lib
+    libvlc
+    xorg.libX11
+    xorg.libXext
+    xorg.libXrender
+    xorg.libXtst
+    xorg.libXi
+    freetype
+    fontconfig
+    icu
+  ];
+  fonts.fontconfig.useEmbeddedBitmaps = true;
+
+
+
+
+
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -47,21 +69,41 @@
     variant = "altgr-intl";
   };
 
+  # Fonts
+  fonts.packages = with pkgs; [
+    nerd-fonts.adwaita-mono
+    nerd-fonts.jetbrains-mono
+  ];
+ 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  
   users.users.ale = {
     isNormalUser = true;
     description = "Ale";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     packages = with pkgs; [
       neovim
+      tree-sitter
       uv
       ripgrep
-      sublime
       python3
+      sublime3
       gcc
       discord
-      atuin
-    ];
+      libGL
+      libGLU  
+      spotify
+      # atuin
+      vscode
+      zoom-us
+      docker-compose
+      postman
+      benhsm-minesweeper
+      aisleriot
+      beekeeper-studio
+      jetbrains-toolbox
+      postgresql
+   ];
   };
 
   # Programs
@@ -71,6 +113,7 @@
   };
   programs.firefox.enable = true;
   programs.dconf.enable = true;
+  programs.neovim.enable = true;
   
   # Services
   services.libinput.enable = true;
@@ -86,7 +129,12 @@
   
   services.flatpak.enable = true;
   services.blueman.enable = true;
-
+  services.postgresql = {
+    enable = true;
+    extraPlugins = with config.services.postgresql.package.pkgs; [
+      pg_uuidv7
+    ];
+  };
   # Security
   security.pam.services.ly.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
@@ -105,6 +153,7 @@
     foot
     git
     unzip
+    zip
     waybar
     wofi
     swaylock
@@ -127,6 +176,8 @@
     vesktop
     nodejs_24
     stow
+    openssl
+    javaPackages.compiler.openjdk17-bootstrap
   ];
 
 
@@ -160,7 +211,7 @@
   system.stateVersion = "25.11"; # Did you read the comment?
   
 
-  # Bluetooth
+  # Hardware
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -171,7 +222,23 @@
       };
     };
   };
+  hardware.graphics.enable = true;
 
+  # Virtual Box
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.docker.enable = true;
+  users.extraGroups.vboxusers.members = [ "user-with-access-to-virtualbox" "docker" ];
+
+  
+  nixpkgs.config.permittedInsecurePackages = [
+    "beekeeper-studio-5.3.4"
+  ];
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 
 }
 
