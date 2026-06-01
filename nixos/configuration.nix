@@ -3,12 +3,33 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
+let unstable = import <unstable> {}; in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
+  services.tailscale.enable = true;
+  networking.nftables.enable = true;
+  networking.firewall = {
+    enable = true;
+    # Always allow traffic from your Tailscale network
+    trustedInterfaces = [ "tailscale0" ];
+    # Allow the Tailscale UDP port through the firewall
+    allowedTCPPorts = [ 8000 4096 3000 ];
+    allowedUDPPorts = [ config.services.tailscale.port ];
+  };
+
+  # 2. Force tailscaled to use nftables (Critical for clean nftables-only systems)
+  # This avoids the "iptables-compat" translation layer issues.
+  systemd.services.tailscaled.serviceConfig.Environment = [ 
+    "TS_DEBUG_FIREWALL_MODE=nftables" 
+  ];
+
+  # 3. Optimization: Prevent systemd from waiting for network online 
+  # (Optional but recommended for faster boot with VPNs)
+  systemd.network.wait-online.enable = false; 
+  boot.initrd.systemd.network.wait-online.enable = false;
 
   programs.nix-ld.enable = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -28,13 +49,20 @@
   fonts.fontconfig.useEmbeddedBitmaps = true;
 
 
-
+  environment.sessionVariables = {
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      SSL_CERT_DIR = "${pkgs.cacert}/etc/ssl/certs";
+  };
 
 
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelParams = [
+    "i2c_designware.disable_acpi_system_pm=1"
+    "i2c_hid.acpi_system_pm=0"
+  ];
 
   networking.hostName = "nixos"; # Define your hostname.
   
@@ -102,6 +130,9 @@
       beekeeper-studio
       jetbrains-toolbox
       postgresql
+      telegram-desktop
+      unstable.opencode
+      playwright-mcp
    ];
   };
 
@@ -115,7 +146,18 @@
   programs.neovim.enable = true;
   
   # Services
-  services.libinput.enable = true;
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      naturalScrolling = false;
+      disableWhileTyping = true;
+      scrollMethod = "twofinger";
+      tapping = false;
+      additionalOptions = ''
+        ScrollPixelDistance 20
+      '';
+    };
+  };
   services.gnome.gnome-keyring.enable = true;
   services.pipewire = {
     enable = true;
@@ -128,12 +170,15 @@
   
   services.flatpak.enable = true;
   services.blueman.enable = true;
-  services.postgresql = {
-    enable = true;
-    extraPlugins = with config.services.postgresql.package.pkgs; [
-      pg_uuidv7
-    ];
-  };
+  # services.postgresql = {
+    # enable = true;
+    # extensions = ps: [ ps.postgis ];
+  # };
+  # Prevent Synaptics I2C touchpad from entering bad power state on lid close
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="i2c", DRIVER=="i2c_hid_acpi", ATTR{power/control}="on"
+  '';
+
   # Security
   security.pam.services.ly.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
