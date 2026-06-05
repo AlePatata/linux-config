@@ -34,6 +34,8 @@ let unstable = import <unstable> {}; in
   programs.nix-ld.enable = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   
+  nix.settings.auto-optimise-store = true;
+
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc.lib
     libvlc
@@ -144,6 +146,12 @@ let unstable = import <unstable> {}; in
   programs.firefox.enable = true;
   programs.dconf.enable = true;
   programs.neovim.enable = true;
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+  };
   
   # Services
   services.libinput = {
@@ -186,6 +194,7 @@ let unstable = import <unstable> {}; in
 
   
   nixpkgs.config.allowUnfree = true;
+
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
