@@ -135,6 +135,7 @@ let unstable = import <unstable> {}; in
       telegram-desktop
       unstable.opencode
       playwright-mcp
+      supertuxkart
    ];
   };
 
